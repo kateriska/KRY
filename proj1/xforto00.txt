@@ -1,0 +1,19 @@
+Název použité šifry: Playfair šifra
+Důležité aspekty této šifry: Sudá délka šifry, vynechání písmena J při možném klíči, v textu se při rozdělení dvojic šifruje např. ON -> NE a NO -> EN, tedy obrácená písmena v jedné dvojici se šifrují i na obrácené pořadí, problém s dvojicí OO, která se šifruje na OXO (OX -> ZL, XO -> ZN)
+Postup šifry: https://en.wikipedia.org/wiki/Playfair_cipher
+Postup při získání klíče: Inspirovala jsem se tímto návodem: https://crypto.stackexchange.com/questions/35722/how-to-find-the-keyword-of-the-playfair-cipher-given-the-plaintext-and-the-ciph
+
+Ze začátku jsem si vypsala dvojice, které mají v plaintextu i ciphertextu jedno stejné písmeno a tedy musí tvořit jeden řádek nebo sloupec, nejvíce mi pomohlo, že jeden celý řádek nebo sloupec museli tvořit písmena z těchto pravidel NO -> EN (ONE), OL -> NO (LON) a AL -> LO (ALO), díky pravidlu OF -> ZN to musel být nutně sloupec. Sloupec NEALO jsem následně tedy vyplnila jako první a postupně postupovala podobně jako při vyplňování suduku. Další trojice, která musela ležet na jednom řádku nebo sloupci bylo EDR, s tím, že E bylo již zafixováno a proto již bylo nutné, aby EDR leželo v jednom řádku. Následně bylo možné vyplnit pravidlo RO -> EY, které tvoří obdélník a víme již, kde se písmena E, R a O nachází, tedy víme přesnou pozici i Y. Takto postupně jsem vyplňovala celou 5x5 matici. Mezery, čárky a tečky se samozřejmě neuvažovaly.
+
+Tajný klíč:
+G U W F N
+D R S C E
+B H I K A
+Q T V X L
+P Y M Z O
+
+Dešifrovaný zbytek textu:
+HADNORELISHFORTHISXSTRANGEMIDNIGHTCOMPANIONANDBETHOUGHTHIMSELFOFTHEADVENTUREOFBROMBONESWITHTHEGALLOPINGHESXSIANNOWQUICKENEDHISXSTEXEDINHOPESOFLEAVINGHIMBEHINDTHESTRANGERHOWEVERQUICKENEDHISHORSETOANEQUALPACEICHABODPULXLEDUPANDFELXLINTOAWALKTHINKINGTOLAGBEHINDTHEOTHERDIDTHESAMEHISHEARTBEGANTOSINKWITHINHIMHEXENDEAVOREDTORESUMEHISPSALMTUNEBUTHISPARCHEDTONGUECLOVETOTHEROXOFOFHISMOUTHANDHECOULDNOTUTXTERASTAVETHEREWASXSOMETHINGINTHEMOODYANDDOGXGEDSILENCEOFTHISPERTINACIOUSCOMPANIONTHATWASMYSTERIOUSANDAPXPALXLINGITWASXSOONFEARFUZLZLYACKHZFGQEEUXFQV
+
+Formátovaný:
+HAD NO RELISH FOR THISX STRANGE MIDNIGHT COMPANION AND BETHOUGHT HIMSELF OF THE ADVENTURE OF BROMBONES WITH THE GALLOPING HESXSIAN NOW QUICKENED HIS XSTEXED IN HOPES OF LEAVING HIM BEHIND THE STRANGER HOWEVER QUICKENED HIS HORSE TO AN EQUAL PACE ICHABOD PULXLED UP AND FELXL INTO A WALK THINKING TO LAG BEHIND THE OTHER DID THE SAME HIS HEART BEGAN TO SINK WITHIN HIM HE XENDEAVORED TO RESUME HIS PSALM TUNE BUT HIS PARCHED TONGUE CLOVE TO THE ROXOF OF HIS MOUTH AND HE COULD NOT UTXTER A STAVE THERE WASX SOMETHING IN THE MOODY AND DOGXGED SILENCE OF THIS PERTINACIOUS COMPANION THAT WAS MYSTERIOUS AND APXPALXLING IT WASX SOON FEARFUZLZLYACKHZFGQEEUXFQV
