@@ -11,6 +11,9 @@
 
 using namespace std;
 
+unsigned long int modular_exponent(mpz_t a, mpz_t u, mpz_t n);
+bool find_witness(mpz_t a, mpz_t u, mpz_t n, mpz_t n1);
+
 bool miller_rabin_test(mpz_t n)
 {
   mpz_t two_value;
@@ -30,60 +33,220 @@ bool miller_rabin_test(mpz_t n)
   {
     return true;
   }
-  else if (mpz_cmp(modulo_result, zero_value))
+
+  else if (mpz_cmp(modulo_result, zero_value) == 0)
   {
-    cout << "HHHHHHH " << endl;
+    cout << "Odd number - cant be prime" << endl;
     return false;
   }
 
+
   mpz_t n1;
-  mpz_init(n1);
+  mpz_init(n1); // p1
   mpz_t k;
   mpz_init(k);
   mpz_t u;
   mpz_init(u);
-  mpz_set_str(k, "0", 10);
+  mpz_set_str(k, "0", 10); // u
   mpz_sub(n1, n, one_value);
-  mpz_set(u, n1);
+  mpz_set(u, n1); // r = u
 
-  mpz_mod(modulo_result, u, two_value);
-  /*
-  while (mpz_cmp(modulo_result, zero_value))
+  cout << mpz_get_ui(u) << endl;
+  mpz_t modulo_result_shift;
+  mpz_init(modulo_result_shift);
+
+  mpz_mod(modulo_result_shift, u, two_value);
+
+  if (mpz_cmp(modulo_result_shift, zero_value) == 0) {
+  while (true)
   {
+    cout << "DKDKD" << endl;
+    mpz_fdiv_q_2exp(u,u,1); // shift right
+    mpz_add(k, k, one_value);
+    mpz_t modulo_result_shift_iteration;
+    mpz_init(modulo_result_shift_iteration);
 
-  }*/
-
-
-
-
-
-  /*
-  cout << "GGGG" << endl;
-  mpz_t two_value;
-  mpz_set_str(two_value, "2", 10);
-  mpz_t modulo_result;
-  //mpz_init(modulo_result,NULL);
-  cout << mpz_mod(modulo_result, n, two_value) << endl;
-
-  if (mpz_cmp(n, two_value) == 0)
-  {
-    return true;
+    mpz_mod(modulo_result_shift_iteration, u, two_value);
+    if (mpz_cmp(modulo_result_shift_iteration, zero_value) == 0)
+    {
+      continue;
+    }
+    else
+    {
+      break;
+    }
   }
+}
+ // ok nahoru
+  /*
+  mpz_t left_side;
+  mpz_t right_side;
+  mpz_init(left_side);
+  mpz_init(right_side);
+  mpz_sub(left_side, n, one_value);
 
-  else if (mpz_mod(modulo_result, n, two_value) == true)
+  unsigned long int k_int = mpz_get_ui(k);
+  cout << k_int << endl;
+
+  mpz_t right_side_power;
+  mpz_pow_ui(right_side_power, two_value, k_int);
+  mpz_mul(right_side, right_side_power, u);
+
+  unsigned long int left_side_int = mpz_get_ui(left_side);
+  unsigned long int right_side_int = mpz_get_ui(right_side);
+
+  cout << right_side_int << endl;
+  cout << left_side_int << endl;
+  */
+
+  mpz_t num1;
+  mpz_init(num1);
+  mpz_t num2;
+  mpz_init(num2);
+  mpz_t num3;
+  mpz_init(num3);
+
+  mpz_set_str(num1, "3", 10);
+  mpz_set_str(num2, "2", 10);
+  mpz_set_str(num3, "2", 10);
+
+  cout << modular_exponent(num1, num2, num3) << endl;
+
+  unsigned long int generated_a_range = mpz_get_ui(n) - 2 + 1;
+  cout << "LLLL" << endl;
+  cout << generated_a_range << endl;
+
+  srand(time(0));
+  unsigned long int a_int = rand() % generated_a_range + 2;
+  cout << a_int << endl;
+
+  // ok nahoru
+  /*
+  mpz_t a;
+  mpz_init(a);
+  mpz_set_ui(a, a_int);
+
+
+
+
+
+
+  for (int i = 0; i < 100; i++)
   {
-    cout << "HHHHHHH " << endl;
+    if (find_witness(a, u, n, n1))
+    {
+      return false;
+    }
+  }
+  */
+
+
+
+
+  return true;
+}
+/*
+bool find_witness(mpz_t a, mpz_t u, mpz_t n, mpz_t n1)
+{
+  mpz_t two_value;
+  mpz_init(two_value);
+  mpz_set_str(two_value, "2", 10);
+
+  unsigned long int modular_exponent_result = modular_exponent(a, u, n);
+  cout << "Modular exponent result " << modular_exponent_result << endl;;
+
+
+
+  if (modular_exponent_result == 1)
+  {
     return false;
   }
-  //mpz_t n1;
-  //mpz_set_ui(n1, n_value - 1);
-  //cout << mpz_get_ui(n1) << endl;*/
+
+
+  for (unsigned long int i = 0; i < mpz_get_ui(u); i++)
+  {
+    cout << "I " << i << endl;
+    modular_exponent_result = modular_exponent(a, u, n);
+
+    mpz_t modular_exponent_multiply;
+    mpz_t modular_exponent_pow;
+    mpz_init(modular_exponent_multiply);
+    mpz_init(modular_exponent_pow);
+    mpz_pow_ui(modular_exponent_pow, two_value, i);
+    mpz_mul(modular_exponent_multiply, modular_exponent_pow, u);
+    modular_exponent_result = modular_exponent(a, modular_exponent_multiply, n);
+
+    cout << "N1 " <<  mpz_get_ui(n1) << endl;
+    if (modular_exponent_result == mpz_get_ui(n1))
+    {
+      return false;
+    }
+
+  }
+
+
   return true;
+}
+*/
+
+unsigned long int modular_exponent(mpz_t a, mpz_t u, mpz_t n)
+{
+  mpz_t two_value;
+  mpz_init(two_value);
+  mpz_set_str(two_value, "2", 10);
+
+  mpz_t zero_value;
+  mpz_init(zero_value);
+  mpz_set_str(zero_value, "0", 10);
+
+  mpz_t result;
+  mpz_init(result);
+  mpz_set_str(result, "1", 10);
+
+  //mpz_mod(a, a, n);
+
+  if (mpz_cmp(u, zero_value) > 0) {
+  while (true)
+  {
+    mpz_t modulo_result_iteration;
+    mpz_init(modulo_result_iteration);
+    mpz_mod(modulo_result_iteration, u, two_value);
+    if (mpz_cmp(modulo_result_iteration, zero_value) != 0) // if u is odd
+    {
+      mpz_t odd_multiply;
+      mpz_t odd_modulo;
+      mpz_init(odd_multiply);
+      mpz_init(odd_modulo);
+      mpz_mul(odd_multiply, result, a);
+      mpz_mod(odd_modulo, odd_multiply, n);
+      mpz_set(result, odd_modulo);
+    }
+
+    mpz_fdiv_q_2exp(u,u,1); // shift right
+    mpz_t a_multiply;
+    mpz_init(a_multiply);
+    mpz_mul(a_multiply, a, a);
+    mpz_mod(a, a_multiply, n);
+
+    if (mpz_cmp(u, zero_value) > 0)
+    {
+      continue;
+    }
+    else
+    {
+      break;
+    }
+  }
+}
+
+return mpz_get_ui(result);
+
 
 
 
 
 }
+
 
 int main (int argc, char **argv) {
   int opt;
