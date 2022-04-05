@@ -50,7 +50,7 @@ bool miller_rabin_test(mpz_t n)
   mpz_set_str(k, "0", 10); // u
   mpz_sub(n1, n, one_value);
   mpz_set(u, n1); // r = u
-
+  cout << "Printing u " << endl;
   cout << mpz_get_ui(u) << endl;
   mpz_t modulo_result_shift;
   mpz_init(modulo_result_shift);
@@ -61,7 +61,13 @@ bool miller_rabin_test(mpz_t n)
   while (true)
   {
     cout << "DKDKD" << endl;
-    mpz_fdiv_q_2exp(u,u,1); // shift right
+    mpz_fdiv_q_2exp(u,u,1); // shift right'
+    //unsigned long int u_int = mpz_get_ui(u);
+    //u_int = u_int >> 1;
+    //mpz_set_ui(u, u_int);
+
+    //cout << "Printing u" << endl;
+    //cout << u_int << endl;
     mpz_add(k, k, one_value);
     mpz_t modulo_result_shift_iteration;
     mpz_init(modulo_result_shift_iteration);
@@ -78,7 +84,7 @@ bool miller_rabin_test(mpz_t n)
   }
 }
  // ok nahoru
-
+  /*
   mpz_t left_side;
   mpz_t right_side;
   mpz_init(left_side);
@@ -86,6 +92,7 @@ bool miller_rabin_test(mpz_t n)
   mpz_sub(left_side, n, one_value);
 
   unsigned long int k_int = mpz_get_ui(k);
+  cout << "Printing k int" << endl;
   cout << k_int << endl;
 
   mpz_t right_side_power;
@@ -99,6 +106,7 @@ bool miller_rabin_test(mpz_t n)
   cout << "Left and right side " << endl;
   cout << right_side_int << endl;
   cout << left_side_int << endl;
+  */
 
 
   mpz_t num1;
@@ -114,11 +122,24 @@ bool miller_rabin_test(mpz_t n)
 
   //cout << modular_exponent(num1, num2, num3) << endl;
 
-  unsigned long int generated_a_range = mpz_get_ui(n) - 2 + 1;
+  //unsigned long int generated_a_range = mpz_get_ui(n) - 2 + 1;
+  mpz_t generated_a_range;
+  mpz_init(generated_a_range);
+
+  mpz_sub(generated_a_range, n, two_value);
+  mpz_add(generated_a_range, generated_a_range, 1);
   cout << "LLLL" << endl;
   cout << generated_a_range << endl;
 
-  srand(time(0));
+  mpz_t a,temp;
+  mpz_init(a);
+  mpz_init(temp);
+  gmp_randstate_t state;
+  gmp_randinit_mt (state);
+  mpz_urandomb (temp, state,lambda);
+  mpz_nextprime (group_size, temp);
+
+  //srand(time(0));
   //unsigned long int a_int = rand() % generated_a_range + 2;
   //cout << a_int << endl;
 
@@ -133,7 +154,7 @@ bool miller_rabin_test(mpz_t n)
 
 
 
-
+  /*
   for (int i = 0; i < 5; i++)
   {
     unsigned long int a_int = rand() % generated_a_range + 2;
@@ -147,6 +168,7 @@ bool miller_rabin_test(mpz_t n)
       return false;
     }
   }
+  */
 
   return true;
 }
@@ -263,9 +285,11 @@ unsigned long int modular_exponent(mpz_t a, mpz_t u, mpz_t n)
 
 
   cout << "Var " << countBits(u_int) <<  endl;
-  string u_bin = toBinary(u_int);
 
-  for (int i = 0; i < countBits(u_int); i++)
+  string u_bin = toBinary(u_int);
+  cout << "VAR n" << u_bin.length() << endl;
+
+  for (int i = 0; i < u_bin.length(); i++)
   {
     cout << "HHHHHHHHHHHH" << endl;
     cout << u_bin[i] << endl;
@@ -374,33 +398,21 @@ int main (int argc, char **argv) {
   //mpz_t seed;
   //mpz_init_set_ui(seed, 100000U);
   //gmp_randseed_ui(state, seed);
-  random_number = r.get_z_bits(modulus_length);
+  random_number = r.get_z_bits(1024);
   long int random = random_number.get_ui();
+  //mpz_out_str(stdout,16,p);
   cout << random << endl;
-  //mpz_init(msb_bit);
-//  mpz_set_ui(msb_bit, modulus_length - 1);
-  //cout << mpz_get_ui(msb_bit) << endl;
-
   mpz_init(random_number_value);
-  mpz_set_ui(random_number_value, random);
-  mpz_setbit(random_number_value, modulus_length - 1);
-  cout << "Generated number " << endl;
-  cout << mpz_get_ui(random_number_value) << endl;
-  cout << "FFFF" << endl;
+  //mpz_set(random_number_value, random_number);
 
-  mpz_t prime;
-  mpz_init(prime);
-  mpz_set_str(prime, "25", 10);
+  //printf("%zu",size);
+  mpz_set(random_number_value, random_number.get_mpz_t());
+  size_t size = mpz_sizeinbase(random_number_value, 2);
+  cout << size << endl;
+  mpz_init(msb_bit);
+  mpz_set_ui(msb_bit, modulus_length - 1);
+  mpz_out_str(stdout,10,random_number_value);
 
-  int generated_prime_count = 2;
-  mpz_t one_value;
-  mpz_init(one_value);
-  mpz_set_str(one_value, "1", 10);
-
-  if (miller_rabin_test(random_number_value))
-  {
-  cout << mpz_get_ui(random_number_value) << " is potential prime" << endl;
-}
 
   vector <unsigned long int> potential_primes;
   while (generated_prime_count > 0)
@@ -419,6 +431,53 @@ int main (int argc, char **argv) {
   cout << "Prime numms:" << endl;
   cout << potential_primes.at(0) << endl;
   cout << potential_primes.at(1) << endl;
+
+  //mpz_init(msb_bit);
+//  mpz_set_ui(msb_bit, modulus_length - 1);
+  //cout << mpz_get_ui(msb_bit) << endl;
+  /*
+  mpz_init(random_number_value);
+  mpz_set_ui(random_number_value, random);
+  mpz_setbit(random_number_value, modulus_length - 1);
+  cout << "Generated number " << endl;
+  cout << mpz_get_ui(random_number_value) << endl;
+  cout << "FFFF" << endl;
+
+  mpz_t prime;
+  mpz_init(prime);
+//  mpz_set_str(prime, "10441325431941006671", 10);
+mpz_set_str(prime, "104094592358232716379419546801974112915226404051544357217005422894094146306614273246513818587013012716234736029008277268334696705690144624769187623094088317643483059595070767076073181447279623660702239529517521893536950174884432563898812085260064256732220728718256489322050098672359723009207325992993586011943", 10);
+  cout << "Getting prime " << endl;
+  cout << (mpz_get_ui(prime)) << endl;;
+  int generated_prime_count = 2;
+  mpz_t one_value;
+  mpz_init(one_value);
+  mpz_set_str(one_value, "1", 10);
+
+  if (miller_rabin_test(prime))
+  {
+  cout << mpz_get_ui(prime) << " is potential prime" << endl;
+}
+  /*
+  vector <unsigned long int> potential_primes;
+  while (generated_prime_count > 0)
+  {
+  if (miller_rabin_test(random_number_value))
+  {
+    cout << mpz_get_ui(random_number_value) << " is potential prime" << endl;
+    generated_prime_count--;
+    unsigned long int random_number_value_int = mpz_get_ui(random_number_value);
+    potential_primes.push_back(random_number_value_int);
+
+  }
+  mpz_add(random_number_value, random_number_value, one_value);
+  }
+
+  cout << "Prime numms:" << endl;
+  cout << potential_primes.at(0) << endl;
+  cout << potential_primes.at(1) << endl;
+  */
+
 
 
 

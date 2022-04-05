@@ -46,7 +46,10 @@ def square_and_multiply(x, k, p=None):
     Returns: x**k or x**k mod p when p is given
     """
     b = bin(k).lstrip('0b')
+    print("~~~~~~~~~~~~~~")
+    print(k)
     print(bin(k))
+    print("~~~~~~~~~~~~~~")
     r = 1
     for i in b:
         r = r**2
@@ -65,13 +68,22 @@ def miller_rabin_primality_test(p, s=5):
     p1 = p - 1
     u = 0
     r = p1  # p-1 = 2**u * r
-
+    print("//////")
+    print(r)
+    print("//////")
     while r % 2 == 0:
         r >>= 1
+        print("Printing r")
+        print(r)
         u += 1
 
     # at this stage p-1 = 2**u * r  holds
     assert p-1 == 2**u * r
+    print("HHHHHH")
+    print(p-1)
+    print(2**u * r)
+    print(u)
+    print("HHHHHH")
 
     def witness(a):
         """
@@ -123,8 +135,9 @@ def generate_primes(n=512, k=1):
     # follows from the prime number theorem
     necessary_steps = math.floor( math.log(2**n) / 2 )
     # get n random bits as our first number to test for primality
+    print(n)
     x = random.getrandbits(n)
-    #x= 97
+    #x= 104094592358232716379419546801974112915226404051544357217005422894094146306614273246513818587013012716234736029008277268334696705690144624769187623094088317643483059595070767076073181447279623660702239529517521893536950174884432563898812085260064256732220728718256489322050098672359723009207325992993586011943
 
     primes = []
 
@@ -137,7 +150,7 @@ def generate_primes(n=512, k=1):
     return primes
 
 def main():
-    n = 8
+    n = 1024
     primes = generate_primes(n=n)
     for p in primes:
         print('{} is prime with bitlength={}'.format(p, n))
