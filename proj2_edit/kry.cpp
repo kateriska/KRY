@@ -320,12 +320,14 @@ else
 int main (int argc, char **argv) {
   int opt;
   bool g = false;
+  bool e = false;
+  bool d = false;
   int modulus_length;
   //gmp_randstate_t state;
   //mpz_t seed;
   unsigned long int seed_value;
 
-  while ((opt = getopt (argc, argv, ":g:")) != -1)
+  while ((opt = getopt (argc, argv, ":g:e:d:")) != -1)
   {
   switch (opt)
   {
@@ -335,7 +337,13 @@ int main (int argc, char **argv) {
       g = true;
     break;
 
+    case 'e':
+      e = true;
+    break;
 
+    case 'd':
+      d = true;
+    break;
 
     default:
       cerr << "Error - Bad parametres!\n";
@@ -346,7 +354,7 @@ int main (int argc, char **argv) {
   }
 
 
-
+  if (g == true) {
   gmp_randclass r(gmp_randinit_default);
   r.seed(time(NULL));
   mpz_class random_number;
@@ -373,6 +381,10 @@ int main (int argc, char **argv) {
   mpz_t one_value;
   mpz_init(one_value);
   mpz_set_str(one_value, "1", 10);
+
+  mpz_t zero_value;
+  mpz_init(zero_value);
+  mpz_set_str(zero_value, "0", 10);
 
   //miller_rabin_test(prime_value, modulus_length);
 
@@ -437,19 +449,21 @@ int main (int argc, char **argv) {
   // Zvol náhodně e mezi 1 a phi( n ) tak, že gcd(e, phi( n )) = 1
   mpz_t e;
   mpz_init(e);
+
   gmp_randstate_t state;
   gmp_randinit_mt (state);
   gmp_randseed_ui(state, time(NULL));
   //mpz_urandomm(e,state,phi_n);
   mpz_urandomb (e, state, 8);
 
+
   mpz_t four_value;
   mpz_init(four_value);
-  mpz_set_str(four_value, "12", 10);
+  mpz_set_str(four_value, "3", 10);
 
   mpz_t ten_value;
   mpz_init(ten_value);
-  mpz_set_str(ten_value, "24", 10);
+  mpz_set_str(ten_value, "11", 10);
 
 
   //compute_gcd(four_value, ten_value);
@@ -458,13 +472,148 @@ int main (int argc, char **argv) {
   cout << "Getting params " << endl;
   mpz_out_str(stdout,10,phi_n);
 
+  //mpz_set_str(e, "1", 10);
+  //while (compute_gcd(e, phi_n) == false && mpz_cmp(e, phi_n) < 0)
   while (compute_gcd(e, phi_n) == false)
   {
+    mpz_out_str(stdout,10,e);
     mpz_add(e, e, one_value);
   }
 
 
+  // compute of multiplicative inverse
+  mpz_t a;
+  mpz_init(a);
+  mpz_t m;
+  mpz_init(m);
+
+  mpz_set(a, e);
+  mpz_set(m, phi_n);
+
+  mpz_t m0;
+  mpz_init(m0);
+  mpz_set(m0, m);
+  mpz_t y;
+  mpz_init(y);
+  mpz_t x;
+  mpz_init(x);
+  mpz_set_str(y, "0", 10);
+  mpz_set_str(x, "1", 10);
+
+  if (mpz_cmp(m, one_value) == 0)
+  {
+    mpz_set(x, zero_value);
+  }
+  else {
+  while (mpz_cmp(a, one_value) > 0)
+  {
+    mpz_t q;
+    mpz_init(q);
+    mpz_fdiv_q(q, a, m);
+
+    mpz_t t;
+    mpz_init(t);
+    mpz_set(t,m);
+
+    mpz_mod(m, a, m);
+    mpz_set(a,t);
+    mpz_set(t,y);
+
+    mpz_t mul_operation;
+    mpz_init(mul_operation);
+    mpz_mul(mul_operation, q, y);
+    mpz_sub(y, x, mul_operation);
+    mpz_set(x,t);
 
 
-    return 0;
+  }
+}
+
+  if (mpz_cmp(x, zero_value) < 0)
+  {
+    mpz_add(x,x,m0);
+  }
+
+  //cout << "Result inverse" << endl;
+  cout << "Modulus length: " << endl;
+  cout << modulus_length << " ";
+  cout << "P: " << endl;
+  mpz_out_str(stdout,10,p);
+  cout << " " << endl;
+  cout << "Q: " << endl;
+  mpz_out_str(stdout,10,q);
+  cout << " " << endl;
+  cout << "N: " << endl;
+  mpz_out_str(stdout,10,n);
+  cout << " " << endl;
+  cout << "E: " << endl;
+  mpz_out_str(stdout,10,e);
+  cout << " " << endl;
+  cout << "X: " << endl;
+  mpz_out_str(stdout,10,x);
+}
+
+/*
+'''Šifrování''' (0.4b)
+
+vstup: ./kry -e E N M
+
+výstup: C
+
+'''Dešifrování''' (0.4b)
+
+vstup: ./kry -d D N C
+*/
+
+if (e == true)
+{
+  mpz_t e;
+  mpz_init(e);
+  mpz_t n;
+  mpz_init(n);
+  mpz_t m;
+  mpz_init(m);
+
+  // DONT FORGET INPUT ARE IN HEXA!!!!
+  mpz_set_str(e, argv[2], 10);
+  mpz_set_str(n, argv[3], 10);
+  mpz_set_str(m, argv[4], 10);
+
+  mpz_t c;
+  mpz_init(c);
+
+  mpz_powm(c, m, e, n);
+
+  mpz_out_str(stdout,10,c);
+
+
+}
+
+if (d == true)
+{
+  mpz_t d;
+  mpz_init(d);
+  mpz_t n;
+  mpz_init(n);
+  mpz_t c;
+  mpz_init(c);
+
+  // DONT FORGET INPUT ARE IN HEXA!!!!
+  mpz_set_str(d, argv[2], 10);
+  mpz_set_str(n, argv[3], 10);
+  mpz_set_str(c, argv[4], 10);
+
+  mpz_t m;
+  mpz_init(m);
+
+  mpz_powm(m, c, d, n);
+
+  mpz_out_str(stdout,10,m);
+
+
+}
+
+
+
+  return 0;
 }
