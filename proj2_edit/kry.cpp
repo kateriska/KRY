@@ -231,6 +231,91 @@ bool miller_rabin_test(mpz_t n, int modulus_length)
   return true;
 }
 
+bool compute_gcd(mpz_t e, mpz_t phi_n)
+{
+  mpz_t one_value;
+  mpz_init(one_value);
+  mpz_set_str(one_value, "1", 10);
+
+  mpz_t zero_value;
+  mpz_init(zero_value);
+  mpz_set_str(zero_value, "0", 10);
+
+  mpz_t tmp;
+  mpz_init(tmp);
+  if (mpz_cmp(phi_n, e) > 0)
+  {
+    mpz_set(tmp, phi_n);
+    mpz_set(phi_n, e);
+    mpz_set(e, tmp);
+  }
+
+  mpz_t i;
+  mpz_init(i);
+  mpz_set_str(i, "1", 10);
+
+  mpz_t phi_n_add;
+  mpz_init(phi_n_add);
+  mpz_add(phi_n_add, phi_n, one_value);
+
+  mpz_t gcd;
+  mpz_init(gcd);
+
+  mpz_t modulo1;
+  mpz_init(modulo1);
+  mpz_t modulo2;
+  mpz_init(modulo2);
+
+  if (mpz_cmp(i, phi_n_add) < 0) {
+  while (true)
+  {
+    //cout << "Getting i" << endl;
+    //mpz_out_str(stdout,10,i);
+    mpz_mod(modulo1, e, i);
+    mpz_mod(modulo2, phi_n, i);
+
+    if (mpz_cmp(modulo1, zero_value) == 0 && mpz_cmp(modulo2, zero_value) == 0 )
+    {
+      mpz_set(gcd, i);
+    }
+
+    //cout << "Computing gcd for iter" << endl;
+    //mpz_out_str(stdout,10,gcd);
+
+    mpz_add(i, i, one_value);
+    if (mpz_cmp(i, phi_n_add) < 0)
+    {
+      continue;
+    }
+    else
+    {
+      break;
+    }
+
+
+  }
+}
+
+cout << "E value" << endl;
+mpz_out_str(stdout,10,e);
+cout << "Computing gcd" << endl;
+mpz_out_str(stdout,10,gcd);
+
+if (mpz_cmp(gcd, one_value) != 0)
+{
+  return false;
+}
+else
+{
+  return true;
+}
+
+
+
+}
+
+
+
 
 int main (int argc, char **argv) {
   int opt;
@@ -294,6 +379,17 @@ int main (int argc, char **argv) {
 
   vector <unsigned long int> potential_primes;
   int generated_prime_count = 2;
+
+  mpz_t p;
+  mpz_init(p);
+  mpz_t q;
+  mpz_init(q);
+
+  mpz_t p1;
+  mpz_init(p1);
+  mpz_t q1;
+  mpz_init(q1);
+
   while (generated_prime_count > 0)
   {
   if (miller_rabin_test(random_number_value, modulus_length))
@@ -301,6 +397,16 @@ int main (int argc, char **argv) {
     //cout << mpz_get_ui(random_number_value) << " is potential prime" << endl;
     cout << "This number is potential prime:" << endl;
     mpz_out_str(stdout,10,random_number_value);
+
+    if (generated_prime_count == 2)
+    {
+      mpz_set(p, random_number_value);
+    }
+    else if (generated_prime_count == 1)
+    {
+      mpz_set(q, random_number_value);
+    }
+
     generated_prime_count--;
     unsigned long int random_number_value_int = mpz_get_ui(random_number_value);
     potential_primes.push_back(random_number_value_int);
@@ -312,6 +418,50 @@ int main (int argc, char **argv) {
   cout << "Prime numms:" << endl;
   cout << potential_primes.at(0) << endl;
   cout << potential_primes.at(1) << endl;
+
+  mpz_t n;
+  mpz_init(n);
+
+  mpz_t phi_n;
+  mpz_init(phi_n);
+
+  mpz_mul(n, p, q);
+
+  mpz_sub(p1, p, one_value);
+  mpz_sub(q1, q, one_value);
+
+  mpz_mul(phi_n, p1, q1);
+
+  mpz_out_str(stdout,10,phi_n);
+
+  // Zvol náhodně e mezi 1 a phi( n ) tak, že gcd(e, phi( n )) = 1
+  mpz_t e;
+  mpz_init(e);
+  gmp_randstate_t state;
+  gmp_randinit_mt (state);
+  gmp_randseed_ui(state, time(NULL));
+  //mpz_urandomm(e,state,phi_n);
+  mpz_urandomb (e, state, 8);
+
+  mpz_t four_value;
+  mpz_init(four_value);
+  mpz_set_str(four_value, "12", 10);
+
+  mpz_t ten_value;
+  mpz_init(ten_value);
+  mpz_set_str(ten_value, "24", 10);
+
+
+  //compute_gcd(four_value, ten_value);
+  cout << "Getting params " << endl;
+  mpz_out_str(stdout,10,e);
+  cout << "Getting params " << endl;
+  mpz_out_str(stdout,10,phi_n);
+
+  while (compute_gcd(e, phi_n) == false)
+  {
+    mpz_add(e, e, one_value);
+  }
 
 
 

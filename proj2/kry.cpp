@@ -379,25 +379,12 @@ int main (int argc, char **argv) {
   }
   }
 
-  // Create new random number generator state, and initialize state with the Mersenne Twister algorithm.
-  /*mpz_class ran;
-  gmp_randclass rr(gmp_randinit_default);
-  rr.seed(100000U);
-  ran =rr.get_z_bits(125);
-  long int random=ran.get_ui();*/
-
   gmp_randclass r(gmp_randinit_default);
   r.seed(time(NULL));
   mpz_class random_number;
   mpz_t msb_bit;
   mpz_t random_number_value;
-  //mpz_randclass ran;
-//  gmp_randinit_mt(state);
 
-  // Seed random number generator.
-  //mpz_t seed;
-  //mpz_init_set_ui(seed, 100000U);
-  //gmp_randseed_ui(state, seed);
   random_number = r.get_z_bits(1024);
   long int random = random_number.get_ui();
   //mpz_out_str(stdout,16,p);
@@ -415,11 +402,25 @@ int main (int argc, char **argv) {
 
 
   vector <unsigned long int> potential_primes;
+  mpz_t p;
+  mpz_init(p);
+  mpz_t q;
+  mpz_init(q);
+
   while (generated_prime_count > 0)
   {
   if (miller_rabin_test(random_number_value))
   {
     cout << mpz_get_ui(random_number_value) << " is potential prime" << endl;
+
+    if (generated_prime_count == 2)
+    {
+      mpz_set(p, random_number_value);
+    }
+    else if (generated_prime_count == 1)
+    {
+      mpz_set(q, random_number_value);
+    }
     generated_prime_count--;
     unsigned long int random_number_value_int = mpz_get_ui(random_number_value);
     potential_primes.push_back(random_number_value_int);
@@ -432,51 +433,12 @@ int main (int argc, char **argv) {
   cout << potential_primes.at(0) << endl;
   cout << potential_primes.at(1) << endl;
 
-  //mpz_init(msb_bit);
-//  mpz_set_ui(msb_bit, modulus_length - 1);
-  //cout << mpz_get_ui(msb_bit) << endl;
-  /*
-  mpz_init(random_number_value);
-  mpz_set_ui(random_number_value, random);
-  mpz_setbit(random_number_value, modulus_length - 1);
-  cout << "Generated number " << endl;
-  cout << mpz_get_ui(random_number_value) << endl;
-  cout << "FFFF" << endl;
+  mpz_t n;
+  mpz_init(n);
+  mpz_mul(n, p, q);
 
-  mpz_t prime;
-  mpz_init(prime);
-//  mpz_set_str(prime, "10441325431941006671", 10);
-mpz_set_str(prime, "104094592358232716379419546801974112915226404051544357217005422894094146306614273246513818587013012716234736029008277268334696705690144624769187623094088317643483059595070767076073181447279623660702239529517521893536950174884432563898812085260064256732220728718256489322050098672359723009207325992993586011943", 10);
-  cout << "Getting prime " << endl;
-  cout << (mpz_get_ui(prime)) << endl;;
-  int generated_prime_count = 2;
-  mpz_t one_value;
-  mpz_init(one_value);
-  mpz_set_str(one_value, "1", 10);
 
-  if (miller_rabin_test(prime))
-  {
-  cout << mpz_get_ui(prime) << " is potential prime" << endl;
-}
-  /*
-  vector <unsigned long int> potential_primes;
-  while (generated_prime_count > 0)
-  {
-  if (miller_rabin_test(random_number_value))
-  {
-    cout << mpz_get_ui(random_number_value) << " is potential prime" << endl;
-    generated_prime_count--;
-    unsigned long int random_number_value_int = mpz_get_ui(random_number_value);
-    potential_primes.push_back(random_number_value_int);
 
-  }
-  mpz_add(random_number_value, random_number_value, one_value);
-  }
-
-  cout << "Prime numms:" << endl;
-  cout << potential_primes.at(0) << endl;
-  cout << potential_primes.at(1) << endl;
-  */
 
 
 
