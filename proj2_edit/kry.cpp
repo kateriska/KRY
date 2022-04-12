@@ -142,12 +142,9 @@ bool miller_rabin_test(mpz_t n, int modulus_length)
         mpz_mod(y, mul_operation, modular_exponentiation_modulo);
         mpz_fdiv_q(modular_exponentiation_exponent, modular_exponentiation_exponent, two_value);
         //mpz_out_str(stdout,10,exponent);
-
-
-
-
-
     }
+
+
     mpz_t result;
     mpz_init(result);
     mpz_mod(result, x, modular_exponentiation_modulo);
@@ -211,6 +208,8 @@ bool miller_rabin_test(mpz_t n, int modulus_length)
 
 
 
+
+
     cout << "Result of multiply_modulo" <<  endl;
     mpz_out_str(stdout,10,result);
     //cout << "Res2" <<  endl;
@@ -220,6 +219,21 @@ bool miller_rabin_test(mpz_t n, int modulus_length)
     mpz_mod(k_copy_modulo, k_copy, two_value);
     if (mpz_cmp(result, n1) != 0 && mpz_cmp(k_copy_modulo, zero_value) == 0)
     {
+      mpz_clear(two_value);
+      mpz_clear(zero_value);
+      mpz_clear(one_value);
+      mpz_clear(modulo_result);
+      mpz_clear(modulo_result_k);
+      mpz_clear(modular_exponentiation_base);
+      mpz_clear(modular_exponentiation_exponent);
+      mpz_clear(modular_exponentiation_modulo);
+      mpz_clear(x);
+      mpz_clear(y);
+      mpz_clear(k_copy_modulo);
+      mpz_clear(result);
+      mpz_clear(n1);
+      mpz_clear(a);
+      mpz_clear(k_copy);
       return false;
     }
 
@@ -228,90 +242,42 @@ bool miller_rabin_test(mpz_t n, int modulus_length)
   }
 
   cout << "Potential prime" << endl;
+  mpz_clear(two_value);
+  mpz_clear(zero_value);
+  mpz_clear(one_value);
+  mpz_clear(modulo_result);
+  mpz_clear(modulo_result_k);
+
+
+
+
+
   return true;
 }
 
-bool compute_gcd(mpz_t e, mpz_t phi_n)
-{
-  mpz_t one_value;
-  mpz_init(one_value);
-  mpz_set_str(one_value, "1", 10);
 
+void compute_gcd(mpz_t out,mpz_t a, mpz_t b)
+{
   mpz_t zero_value;
   mpz_init(zero_value);
   mpz_set_str(zero_value, "0", 10);
 
-  mpz_t tmp;
-  mpz_init(tmp);
-  if (mpz_cmp(phi_n, e) > 0)
+  mpz_t modulo_operation;
+  mpz_init(modulo_operation);
+
+  mpz_mod(modulo_operation, a, b);
+
+  if (mpz_cmp(modulo_operation, zero_value) == 0)
   {
-    mpz_set(tmp, phi_n);
-    mpz_set(phi_n, e);
-    mpz_set(e, tmp);
+      mpz_set(out,b);
+      mpz_clear(modulo_operation);
+      mpz_out_str(stdout,10,out);
+      return;
   }
 
-  mpz_t i;
-  mpz_init(i);
-  mpz_set_str(i, "1", 10);
-
-  mpz_t phi_n_add;
-  mpz_init(phi_n_add);
-  mpz_add(phi_n_add, phi_n, one_value);
-
-  mpz_t gcd;
-  mpz_init(gcd);
-
-  mpz_t modulo1;
-  mpz_init(modulo1);
-  mpz_t modulo2;
-  mpz_init(modulo2);
-
-  if (mpz_cmp(i, phi_n_add) < 0) {
-  while (true)
-  {
-    //cout << "Getting i" << endl;
-    //mpz_out_str(stdout,10,i);
-    mpz_mod(modulo1, e, i);
-    mpz_mod(modulo2, phi_n, i);
-
-    if (mpz_cmp(modulo1, zero_value) == 0 && mpz_cmp(modulo2, zero_value) == 0 )
-    {
-      mpz_set(gcd, i);
-    }
-
-    //cout << "Computing gcd for iter" << endl;
-    //mpz_out_str(stdout,10,gcd);
-
-    mpz_add(i, i, one_value);
-    if (mpz_cmp(i, phi_n_add) < 0)
-    {
-      continue;
-    }
-    else
-    {
-      break;
-    }
-
-
-  }
-}
-
-cout << "E value" << endl;
-mpz_out_str(stdout,10,e);
-cout << "Computing gcd" << endl;
-mpz_out_str(stdout,10,gcd);
-
-if (mpz_cmp(gcd, one_value) != 0)
-{
-  return false;
-}
-else
-{
-  return true;
-}
-
-
-
+  compute_gcd(out, b, modulo_operation);
+  mpz_clear(modulo_operation);
+  return;
 }
 
 
@@ -323,8 +289,7 @@ int main (int argc, char **argv) {
   bool e = false;
   bool d = false;
   int modulus_length;
-  //gmp_randstate_t state;
-  //mpz_t seed;
+
   unsigned long int seed_value;
 
   while ((opt = getopt (argc, argv, ":g:e:d:")) != -1)
@@ -385,9 +350,6 @@ int main (int argc, char **argv) {
   mpz_t zero_value;
   mpz_init(zero_value);
   mpz_set_str(zero_value, "0", 10);
-
-  //miller_rabin_test(prime_value, modulus_length);
-
 
   vector <unsigned long int> potential_primes;
   int generated_prime_count = 2;
@@ -453,17 +415,17 @@ int main (int argc, char **argv) {
   gmp_randstate_t state;
   gmp_randinit_mt (state);
   gmp_randseed_ui(state, time(NULL));
-  //mpz_urandomm(e,state,phi_n);
-  mpz_urandomb (e, state, 8);
+  mpz_urandomm(e,state,phi_n);
+//  mpz_urandomb (e, state, 8);
 
 
   mpz_t four_value;
   mpz_init(four_value);
-  mpz_set_str(four_value, "3", 10);
+  mpz_set_str(four_value, "12", 10);
 
   mpz_t ten_value;
   mpz_init(ten_value);
-  mpz_set_str(ten_value, "11", 10);
+  mpz_set_str(ten_value, "144", 10);
 
 
   //compute_gcd(four_value, ten_value);
@@ -472,11 +434,17 @@ int main (int argc, char **argv) {
   cout << "Getting params " << endl;
   mpz_out_str(stdout,10,phi_n);
 
-  //mpz_set_str(e, "1", 10);
-  //while (compute_gcd(e, phi_n) == false && mpz_cmp(e, phi_n) < 0)
-  while (compute_gcd(e, phi_n) == false)
+  while (true)
   {
+    mpz_t gcd_res;
+    mpz_init(gcd_res);
+    compute_gcd(gcd_res, e, phi_n);
+
     mpz_out_str(stdout,10,e);
+    if (mpz_cmp(gcd_res, one_value) == 0)
+    {
+      break;
+    }
     mpz_add(e, e, one_value);
   }
 
@@ -551,6 +519,37 @@ int main (int argc, char **argv) {
   cout << " " << endl;
   cout << "X: " << endl;
   mpz_out_str(stdout,10,x);
+
+  mpz_t res;
+  mpz_init(res);
+  compute_gcd(res, phi_n, e);
+  cout << "Result of GCD" << endl;
+  mpz_out_str(stdout,10,res);
+
+  mpz_clear(random_number_value);
+  mpz_clear(modulus_length_value);
+  mpz_clear(msb_bit);
+  mpz_clear(prime_value);
+  mpz_clear(one_value);
+  mpz_clear(zero_value);
+  mpz_clear(p);
+  mpz_clear(q);
+  mpz_clear(p1);
+  mpz_clear(q1);
+  mpz_clear(n);
+  mpz_clear(phi_n);
+  mpz_clear(e);
+  mpz_clear(four_value);
+  mpz_clear(ten_value);
+  mpz_clear(a);
+  mpz_clear(m);
+  mpz_clear(m0);
+  mpz_clear(y);
+  mpz_clear(x);
+  mpz_clear(res);
+
+
+
 }
 
 /*
