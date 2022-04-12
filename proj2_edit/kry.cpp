@@ -28,12 +28,21 @@ bool miller_rabin_test(mpz_t n, int modulus_length)
   mpz_init(modulo_result);
   mpz_mod(modulo_result, n, two_value);
 
+  // even numbers except 2 can't be primes
   if (mpz_cmp(n, two_value) < 0)
   {
+    mpz_clear(two_value);
+    mpz_clear(zero_value);
+    mpz_clear(one_value);
+    mpz_clear(modulo_result);
     return false;
   }
   if (mpz_cmp(n, two_value) != 0 && mpz_cmp(modulo_result, zero_value) == 0)
   {
+    mpz_clear(two_value);
+    mpz_clear(zero_value);
+    mpz_clear(one_value);
+    mpz_clear(modulo_result);
     return false;
   }
 
@@ -46,14 +55,15 @@ bool miller_rabin_test(mpz_t n, int modulus_length)
 
   mpz_mod(modulo_result_k, k, two_value);
 
+  mpz_t modulo_result_k_iteration;
+  mpz_init(modulo_result_k_iteration);
+
   if (mpz_cmp(modulo_result_k, zero_value) == 0)
   {
+
     while(true)
     {
       mpz_fdiv_q(k,k,two_value);
-
-      mpz_t modulo_result_k_iteration;
-      mpz_init(modulo_result_k_iteration);
 
       mpz_mod(modulo_result_k_iteration, k, two_value);
 
@@ -66,44 +76,78 @@ bool miller_rabin_test(mpz_t n, int modulus_length)
         break;
       }
     }
+
   }
   cout << "Counted k" << endl;
   mpz_out_str(stdout,10,k);
 
 
 
+  // declaration of variables outside a loop of testing witnesses for simple cleaning after processing
+  mpz_t a; // randomly generated witness
+  mpz_init(a);
+  mpz_t k_copy;
+  mpz_init(k_copy);
 
+  // variables for modular exponentiation
+  mpz_t modular_exponentiation_base;
+  mpz_t modular_exponentiation_exponent;
+  mpz_t modular_exponentiation_modulo;
 
+  mpz_init(modular_exponentiation_base);
+  mpz_init(modular_exponentiation_exponent);
+  mpz_init(modular_exponentiation_modulo);
+
+  mpz_t x;
+  mpz_init(x);
+  mpz_t y;
+  mpz_init(y);
+
+  mpz_t modulo_exponent;
+  mpz_init(modulo_exponent);
+  mpz_t mul_operation;
+  mpz_init(mul_operation);
+
+  mpz_t result;
+  mpz_init(result);
+
+  mpz_t n1;
+  mpz_init(n1);
+
+  // variables for multiply and modulo operation
+  mpz_t multiply_modulo_factor1;
+  mpz_t multiply_modulo_factor2;
+  mpz_t multiply_modulo_modulo;
+  mpz_init(multiply_modulo_factor1);
+  mpz_init(multiply_modulo_factor2);
+  mpz_init(multiply_modulo_modulo);
+
+  mpz_t modulo_factor2;
+  mpz_init(modulo_factor2);
+
+  mpz_t add_operation;
+  mpz_init(add_operation);
+
+  mpz_t k_copy_modulo;
+  mpz_init(k_copy_modulo);
+
+  gmp_randstate_t state; // random state init for generating possible witnesses
+  gmp_randinit_mt (state);
+  // find possible witnesses
   for (int i = 0; i < 5; i++)
   {
-    //unsigned long int a_int = rand() % generated_a_range + 2;
-    //cout << a_int << endl;
-    mpz_t a;
-    mpz_init(a);
-    gmp_randstate_t state;
-    gmp_randinit_mt (state);
     gmp_randseed_ui(state, time(NULL));
     mpz_urandomm(a,state,n);
     cout << "Getting random number a" <<  endl;
     //mpz_set_str(a, "39", 10);
     mpz_out_str(stdout,10,a);
 
-    //cout << "DDDD" <<  endl;
-    mpz_t k_copy;
-    mpz_init(k_copy);
     mpz_set(k_copy, k);
 
     //mpz_out_str(stdout,10,k_copy);
 
     // counting modular exponentiation
     // (modular_exponentiation_base^modular_exponentiation_exponent) % modular_exponentiation_modulo
-    mpz_t modular_exponentiation_base;
-    mpz_t modular_exponentiation_exponent;
-    mpz_t modular_exponentiation_modulo;
-
-    mpz_init(modular_exponentiation_base);
-    mpz_init(modular_exponentiation_exponent);
-    mpz_init(modular_exponentiation_modulo);
 
     mpz_set(modular_exponentiation_base, a);
     //cout << "Getting modular_exponent_base" << endl;
@@ -111,89 +155,55 @@ bool miller_rabin_test(mpz_t n, int modulus_length)
     mpz_set(modular_exponentiation_exponent, k_copy);
     mpz_set(modular_exponentiation_modulo, n);
 
-    mpz_t x;
-    mpz_init(x);
     mpz_set_str(x, "1", 10);
-    mpz_t y;
-    mpz_init(y);
     mpz_set(y, modular_exponentiation_base);
-    //cout << "ZZZ" << endl;
-
-
-
 
       while (mpz_cmp(modular_exponentiation_exponent, zero_value) > 0)
       {
-        mpz_t modulo_exponent;
-        mpz_init(modulo_exponent);
         mpz_mod(modulo_exponent, modular_exponentiation_exponent, two_value);
         if (mpz_cmp(modulo_exponent, one_value) == 0)
         {
-          mpz_t mul_operation;
-          mpz_init(mul_operation);
           mpz_mul(mul_operation, x, y);
           //mpz_out_str(stdout,10,y);
           //cout << "Update x" << endl;
           mpz_mod(x, mul_operation, modular_exponentiation_modulo);
         }
-        mpz_t mul_operation;
-        mpz_init(mul_operation);
+
         mpz_mul(mul_operation, y, y);
         mpz_mod(y, mul_operation, modular_exponentiation_modulo);
         mpz_fdiv_q(modular_exponentiation_exponent, modular_exponentiation_exponent, two_value);
         //mpz_out_str(stdout,10,exponent);
     }
 
-
-    mpz_t result;
-    mpz_init(result);
     mpz_mod(result, x, modular_exponentiation_modulo);
 
     cout << "Result of modular exponentiation" <<  endl;
     mpz_out_str(stdout,10,result);
 
     // end of counting modular exponentiation
-    mpz_t n1;
-    mpz_init(n1);
+
     mpz_sub(n1, n, one_value);
 
     // couning of (multiply_modulo_factor1 * multiply_modulo_factor2) % multiply_modulo_modulo
     while (mpz_cmp(k_copy, n1) != 0 && mpz_cmp(result, one_value) != 0 && mpz_cmp(result, n1) != 0)
     {
-      mpz_t multiply_modulo_factor1;
-      mpz_t multiply_modulo_factor2;
-      mpz_t multiply_modulo_modulo;
-      mpz_init(multiply_modulo_factor1);
-      mpz_init(multiply_modulo_factor2);
-      mpz_init(multiply_modulo_modulo);
-
       mpz_set(multiply_modulo_factor1, result);
       mpz_set(multiply_modulo_factor2, result);
       mpz_set(multiply_modulo_modulo, n);
 
-      mpz_t x;
-      mpz_init(x);
       mpz_set_str(x, "0", 10);
-      mpz_t y;
-      mpz_init(y);
       mpz_mod(y, multiply_modulo_factor1, multiply_modulo_modulo);
 
       while (mpz_cmp(multiply_modulo_factor2, zero_value) > 0)
       {
-        mpz_t modulo_factor2;
-        mpz_init(modulo_factor2);
         mpz_mod(modulo_factor2, multiply_modulo_factor2, two_value);
 
         if (mpz_cmp(modulo_factor2, one_value) == 0)
         {
-          mpz_t add_operation;
-          mpz_init(add_operation);
           mpz_add(add_operation, x, y);
           mpz_mod(x, add_operation, multiply_modulo_modulo);
         }
 
-        mpz_t mul_operation;
-        mpz_init(mul_operation);
         mpz_mul(mul_operation, y, two_value);
         mpz_mod(y, mul_operation, multiply_modulo_modulo);
         mpz_fdiv_q(multiply_modulo_factor2, multiply_modulo_factor2, two_value);
@@ -206,34 +216,51 @@ bool miller_rabin_test(mpz_t n, int modulus_length)
 
     }
 
-
-
-
-
     cout << "Result of multiply_modulo" <<  endl;
     mpz_out_str(stdout,10,result);
     //cout << "Res2" <<  endl;
 
-    mpz_t k_copy_modulo;
-    mpz_init(k_copy_modulo);
     mpz_mod(k_copy_modulo, k_copy, two_value);
     if (mpz_cmp(result, n1) != 0 && mpz_cmp(k_copy_modulo, zero_value) == 0)
     {
+      // necessary cleaning to avoid memory leaks
       mpz_clear(two_value);
       mpz_clear(zero_value);
       mpz_clear(one_value);
+
       mpz_clear(modulo_result);
+
+      mpz_clear(k);
       mpz_clear(modulo_result_k);
+      mpz_clear(modulo_result_k_iteration);
+
+      mpz_clear(a);
+      mpz_clear(k_copy);
+
       mpz_clear(modular_exponentiation_base);
       mpz_clear(modular_exponentiation_exponent);
       mpz_clear(modular_exponentiation_modulo);
+
       mpz_clear(x);
       mpz_clear(y);
-      mpz_clear(k_copy_modulo);
+
+      mpz_clear(modulo_exponent);
+      mpz_clear(mul_operation);
+
       mpz_clear(result);
+
       mpz_clear(n1);
-      mpz_clear(a);
-      mpz_clear(k_copy);
+
+      mpz_clear(multiply_modulo_factor1);
+      mpz_clear(multiply_modulo_factor2);
+      mpz_clear(multiply_modulo_modulo);
+
+      mpz_clear(modulo_factor2);
+
+      mpz_clear(add_operation);
+      mpz_clear(k_copy_modulo);
+
+      gmp_randclear(state);
       return false;
     }
 
@@ -242,15 +269,44 @@ bool miller_rabin_test(mpz_t n, int modulus_length)
   }
 
   cout << "Potential prime" << endl;
+  // necessary cleaning to avoid memory leaks
   mpz_clear(two_value);
   mpz_clear(zero_value);
   mpz_clear(one_value);
+
   mpz_clear(modulo_result);
+
+  mpz_clear(k);
   mpz_clear(modulo_result_k);
+  mpz_clear(modulo_result_k_iteration);
 
+  mpz_clear(a);
+  mpz_clear(k_copy);
 
+  mpz_clear(modular_exponentiation_base);
+  mpz_clear(modular_exponentiation_exponent);
+  mpz_clear(modular_exponentiation_modulo);
 
+  mpz_clear(x);
+  mpz_clear(y);
 
+  mpz_clear(modulo_exponent);
+  mpz_clear(mul_operation);
+
+  mpz_clear(result);
+
+  mpz_clear(n1);
+
+  mpz_clear(multiply_modulo_factor1);
+  mpz_clear(multiply_modulo_factor2);
+  mpz_clear(multiply_modulo_modulo);
+
+  mpz_clear(modulo_factor2);
+
+  mpz_clear(add_operation);
+  mpz_clear(k_copy_modulo);
+
+  gmp_randclear(state);
 
   return true;
 }
@@ -271,12 +327,14 @@ void compute_gcd(mpz_t out,mpz_t a, mpz_t b)
   {
       mpz_set(out,b);
       mpz_clear(modulo_operation);
+      mpz_clear(zero_value);
       mpz_out_str(stdout,10,out);
       return;
   }
 
   compute_gcd(out, b, modulo_operation);
   mpz_clear(modulo_operation);
+  mpz_clear(zero_value);
   return;
 }
 
@@ -434,10 +492,10 @@ int main (int argc, char **argv) {
   cout << "Getting params " << endl;
   mpz_out_str(stdout,10,phi_n);
 
+  mpz_t gcd_res;
+  mpz_init(gcd_res);
   while (true)
   {
-    mpz_t gcd_res;
-    mpz_init(gcd_res);
     compute_gcd(gcd_res, e, phi_n);
 
     mpz_out_str(stdout,10,e);
@@ -468,6 +526,14 @@ int main (int argc, char **argv) {
   mpz_set_str(y, "0", 10);
   mpz_set_str(x, "1", 10);
 
+  mpz_t quotient;
+  mpz_init(quotient);
+  mpz_t t;
+  mpz_init(t);
+  mpz_t mul_operation;
+  mpz_init(mul_operation);
+
+
   if (mpz_cmp(m, one_value) == 0)
   {
     mpz_set(x, zero_value);
@@ -475,24 +541,17 @@ int main (int argc, char **argv) {
   else {
   while (mpz_cmp(a, one_value) > 0)
   {
-    mpz_t q;
-    mpz_init(q);
-    mpz_fdiv_q(q, a, m);
+    mpz_fdiv_q(quotient, a, m);
 
-    mpz_t t;
-    mpz_init(t);
     mpz_set(t,m);
 
     mpz_mod(m, a, m);
     mpz_set(a,t);
     mpz_set(t,y);
 
-    mpz_t mul_operation;
-    mpz_init(mul_operation);
-    mpz_mul(mul_operation, q, y);
+    mpz_mul(mul_operation, quotient, y);
     mpz_sub(y, x, mul_operation);
     mpz_set(x,t);
-
 
   }
 }
@@ -526,27 +585,43 @@ int main (int argc, char **argv) {
   cout << "Result of GCD" << endl;
   mpz_out_str(stdout,10,res);
 
+  // cleaning to avoid memory leaks
   mpz_clear(random_number_value);
   mpz_clear(modulus_length_value);
+
   mpz_clear(msb_bit);
+
   mpz_clear(prime_value);
+
   mpz_clear(one_value);
   mpz_clear(zero_value);
+
   mpz_clear(p);
   mpz_clear(q);
+
   mpz_clear(p1);
   mpz_clear(q1);
+
   mpz_clear(n);
   mpz_clear(phi_n);
   mpz_clear(e);
+
   mpz_clear(four_value);
   mpz_clear(ten_value);
+
+  mpz_clear(gcd_res);
+
   mpz_clear(a);
   mpz_clear(m);
   mpz_clear(m0);
   mpz_clear(y);
   mpz_clear(x);
+  mpz_clear(quotient);
+  mpz_clear(t);
+  mpz_clear(mul_operation);
+
   mpz_clear(res);
+  gmp_randclear(state);
 
 
 
@@ -585,6 +660,11 @@ if (e == true)
 
   mpz_out_str(stdout,10,c);
 
+  mpz_clear(e);
+  mpz_clear(n);
+  mpz_clear(m);
+  mpz_clear(c);
+
 
 }
 
@@ -608,6 +688,11 @@ if (d == true)
   mpz_powm(m, c, d, n);
 
   mpz_out_str(stdout,10,m);
+
+  mpz_clear(d);
+  mpz_clear(n);
+  mpz_clear(c);
+  mpz_clear(m);
 
 
 }
