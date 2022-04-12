@@ -328,7 +328,7 @@ void compute_gcd(mpz_t out,mpz_t a, mpz_t b)
       mpz_set(out,b);
       mpz_clear(modulo_operation);
       mpz_clear(zero_value);
-      mpz_out_str(stdout,10,out);
+      //mpz_out_str(stdout,10,out);
       return;
   }
 
@@ -561,23 +561,48 @@ int main (int argc, char **argv) {
     mpz_add(x,x,m0);
   }
 
-  //cout << "Result inverse" << endl;
-  cout << "Modulus length: " << endl;
+  putchar('\n');
+  putchar('\n');
+  putchar('\n');
   cout << modulus_length << " ";
+  cout << "0x";
+  mpz_out_str(stdout,16,p);
+  cout << " ";
+  cout << "0x";
+  mpz_out_str(stdout,16,q);
+  cout << " ";
+  cout << "0x";
+  mpz_out_str(stdout,16,n);
+  cout << " ";
+  cout << "0x";
+  mpz_out_str(stdout,16,e);
+  cout << " ";
+  cout << "0x";
+  mpz_out_str(stdout,16,x);
+
+  putchar('\n');
+  putchar('\n');
+
+
+  cout << "Modulus length: " << endl;
+  cout << modulus_length;
+  putchar('\n');
   cout << "P: " << endl;
   mpz_out_str(stdout,10,p);
-  cout << " " << endl;
+  putchar('\n');
   cout << "Q: " << endl;
   mpz_out_str(stdout,10,q);
-  cout << " " << endl;
+  putchar('\n');
   cout << "N: " << endl;
   mpz_out_str(stdout,10,n);
-  cout << " " << endl;
+  putchar('\n');
   cout << "E: " << endl;
   mpz_out_str(stdout,10,e);
-  cout << " " << endl;
+  putchar('\n');
   cout << "X: " << endl;
   mpz_out_str(stdout,10,x);
+  putchar('\n');
+
 
   mpz_t res;
   mpz_init(res);
@@ -649,16 +674,18 @@ if (e == true)
   mpz_init(m);
 
   // DONT FORGET INPUT ARE IN HEXA!!!!
-  mpz_set_str(e, argv[2], 10);
-  mpz_set_str(n, argv[3], 10);
-  mpz_set_str(m, argv[4], 10);
+  mpz_set_str(e, argv[2], 0);
+  mpz_set_str(n, argv[3], 0);
+  mpz_set_str(m, argv[4], 0);
 
   mpz_t c;
   mpz_init(c);
 
   mpz_powm(c, m, e, n);
 
-  mpz_out_str(stdout,10,c);
+  cout << "0x";
+  mpz_out_str(stdout,16,c);
+  putchar('\n');
 
   mpz_clear(e);
   mpz_clear(n);
@@ -678,16 +705,18 @@ if (d == true)
   mpz_init(c);
 
   // DONT FORGET INPUT ARE IN HEXA!!!!
-  mpz_set_str(d, argv[2], 10);
-  mpz_set_str(n, argv[3], 10);
-  mpz_set_str(c, argv[4], 10);
+  mpz_set_str(d, argv[2], 0);
+  mpz_set_str(n, argv[3], 0);
+  mpz_set_str(c, argv[4], 0);
 
   mpz_t m;
   mpz_init(m);
 
   mpz_powm(m, c, d, n);
 
-  mpz_out_str(stdout,10,m);
+  cout << "0x";
+  mpz_out_str(stdout,16,m);
+  putchar('\n');
 
   mpz_clear(d);
   mpz_clear(n);
