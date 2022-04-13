@@ -338,6 +338,184 @@ void compute_gcd(mpz_t out,mpz_t a, mpz_t b)
   return;
 }
 
+/*
+Veřejný modulus nejdříve zkontrolujte pomocí metody '''triviálního (zkusmého) dělení''' pro '''prvních 1 000 000 čísel'''.
+Metoda triviálního dělení je nejjednodušší metodou pro faktorizaci celých čísel
+Metoda pracuje na základě zvolení počátečního dělitele (např. 2) a následném ověření, zda dělitel opravdu dělí zadané číslo beze zbytku.
+Pokud ne, dojde k inkrementaci hodnoty dělitele a opět se ověřuje dělitelnost beze zbytku.
+Tento proces je opakován tak dlouho, dokud není nalezen správný dělitel.
+*/
+void trivial_division(mpz_t out, mpz_t n)
+{
+  mpz_t divisor;
+  mpz_init(divisor);
+  mpz_set_str(divisor, "2", 10);
+
+  mpz_t divisor_end;
+  mpz_init(divisor_end);
+  mpz_set_str(divisor_end, "1000001", 10);
+
+  mpz_t zero_value;
+  mpz_init(zero_value);
+  mpz_set_str(zero_value, "0", 10);
+
+  mpz_t one_value;
+  mpz_init(one_value);
+  mpz_set_str(one_value, "1", 10);
+
+  mpz_t modulo_result;
+  mpz_init(modulo_result);
+
+  mpz_mod(modulo_result, n, divisor);
+
+  mpz_t modulo_result_iteration;
+  mpz_init(modulo_result_iteration);
+  if (mpz_cmp(modulo_result, zero_value) != 0)
+  {
+    while (true)
+    {
+      mpz_mod(modulo_result_iteration, n, divisor);
+
+      // found correct divisor
+      if (mpz_cmp(modulo_result_iteration, zero_value) == 0)
+      {
+        mpz_set(out, divisor);
+
+        mpz_clear(divisor);
+        mpz_clear(divisor_end);
+        mpz_clear(zero_value);
+        mpz_clear(one_value);
+        mpz_clear(modulo_result);
+        mpz_clear(modulo_result_iteration);
+        return;
+      }
+
+      mpz_add(divisor, divisor, one_value);
+
+      // only test first 1 000 000 divisors, so if finding divisor was stil unsucessful, set divisor to 1 and possibly find them with Fermat factorization
+      if (mpz_cmp(divisor, divisor_end) == 0)
+      {
+        mpz_set(out, one_value);
+
+        mpz_clear(divisor);
+        mpz_clear(divisor_end);
+        mpz_clear(zero_value);
+        mpz_clear(one_value);
+        mpz_clear(modulo_result);
+        mpz_clear(modulo_result_iteration);
+        return;
+      }
+
+
+    }
+  }
+
+  mpz_set(out, divisor);
+  mpz_clear(divisor);
+  mpz_clear(divisor_end);
+  mpz_clear(zero_value);
+  mpz_clear(one_value);
+  mpz_clear(modulo_result);
+  mpz_clear(modulo_result_iteration);
+  return;
+}
+
+void fermat_factorization(mpz_t out, mpz_t n)
+{
+  mpz_t a;
+  mpz_init(a);
+
+  mpz_t n_sqrt;
+  mpz_init(n_sqrt);
+
+  mpz_t one_value;
+  mpz_init(one_value);
+  mpz_set_str(one_value, "1", 10);
+
+  mpz_sqrt(n_sqrt, n);
+  mpz_add(a, n_sqrt, one_value);
+
+  mpz_t mul_operation;
+  mpz_init(mul_operation);
+  mpz_mul(mul_operation, a, a);
+
+  if (mpz_cmp(mul_operation, n) == 0)
+  {
+    mpz_set(out, a);
+
+    mpz_clear(a);
+    mpz_clear(n_sqrt);
+    mpz_clear(one_value);
+    mpz_clear(mul_operation);
+    return;
+  }
+
+  mpz_t b;
+  mpz_init(b);
+
+  mpz_t b1;
+  mpz_init(b1);
+
+  mpz_t mul_operation_iteration_a;
+  mpz_init(mul_operation_iteration_a);
+  mpz_t mul_operation_iteration_b;
+  mpz_init(mul_operation_iteration_b);
+
+  while (true)
+  {
+    mpz_mul(mul_operation_iteration_a, a, a);
+    mpz_sub(b1, mul_operation_iteration_a, n);
+    mpz_sqrt(b,b1);
+
+    mpz_mul(mul_operation_iteration_b, b, b);
+    if (mpz_cmp(mul_operation_iteration_b, b1) == 0)
+    {
+      break;
+    }
+    else
+    {
+      mpz_add(a, a, one_value);
+    }
+
+  }
+
+  mpz_t p;
+  mpz_init(p);
+  mpz_t q;
+  mpz_init(q);
+
+  mpz_t computed_n;
+  mpz_init(computed_n);
+
+  mpz_sub(p, a, b);
+  mpz_add(q, a, b);
+  mpz_set(out, p);
+  mpz_mul(computed_n, p, q);
+
+  // check of correctness
+  if (mpz_cmp(n, computed_n) == 0)
+  {
+    cout << "Fermat factorization was success" << endl;
+  }
+
+  mpz_clear(a);
+  mpz_clear(n_sqrt);
+  mpz_clear(one_value);
+  mpz_clear(mul_operation);
+
+  mpz_clear(b);
+  mpz_clear(b1);
+  mpz_clear(mul_operation_iteration_a);
+  mpz_clear(mul_operation_iteration_b);
+
+  mpz_clear(p);
+  mpz_clear(q);
+
+  mpz_clear(computed_n);
+
+  return;
+
+}
 
 
 
@@ -346,11 +524,12 @@ int main (int argc, char **argv) {
   bool g = false;
   bool e = false;
   bool d = false;
+  bool b = false;
   int modulus_length;
 
   unsigned long int seed_value;
 
-  while ((opt = getopt (argc, argv, ":g:e:d:")) != -1)
+  while ((opt = getopt (argc, argv, ":g:e:d:b:")) != -1)
   {
   switch (opt)
   {
@@ -366,6 +545,10 @@ int main (int argc, char **argv) {
 
     case 'd':
       d = true;
+    break;
+
+    case 'b':
+      b = true;
     break;
 
     default:
@@ -722,6 +905,59 @@ if (d == true)
   mpz_clear(n);
   mpz_clear(c);
   mpz_clear(m);
+
+
+}
+
+/*
+'''Prolomení RSA''' (2.6b)
+
+vstup: ./kry -b N
+
+'''Bezpečnost řešení''' (1b)
+Statická analýza - (0.3b)
+Sanitizéry - (0.7b)
+
+výstup: P
+*/
+
+if (b == true)
+{
+  mpz_t one_value;
+  mpz_init(one_value);
+  mpz_set_str(one_value, "1", 10);
+
+  mpz_t n;
+  mpz_init(n);
+  mpz_set_str(n, argv[2], 10);
+
+  mpz_t trivial_division_res;
+  mpz_init(trivial_division_res);
+  trivial_division(trivial_division_res, n);
+
+  mpz_out_str(stdout,10,trivial_division_res);
+  putchar('\n');
+
+  mpz_t fermat_factorization_res;
+  mpz_init(fermat_factorization_res);
+
+  // trivial division unsucessful, need to call more effective fermat factorization
+  if (mpz_cmp(trivial_division_res, one_value) == 0)
+  {
+    cout << "Need to do fermat factorization" << endl;
+    fermat_factorization(fermat_factorization_res, n);
+    mpz_out_str(stdout,10,fermat_factorization_res);
+    putchar('\n');
+  }
+
+  mpz_clear(one_value);
+  mpz_clear(n);
+  mpz_clear(trivial_division_res);
+  mpz_clear(fermat_factorization_res);
+
+
+
+
 
 
 }
