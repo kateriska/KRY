@@ -60,7 +60,6 @@ bool miller_rabin_test(mpz_t n, int modulus_length)
 
   if (mpz_cmp(modulo_result_k, zero_value) == 0)
   {
-
     while(true)
     {
       mpz_fdiv_q(k,k,two_value);
@@ -78,10 +77,8 @@ bool miller_rabin_test(mpz_t n, int modulus_length)
     }
 
   }
-  cout << "Counted k" << endl;
-  mpz_out_str(stdout,10,k);
-
-
+  //cout << "Counted k" << endl;
+  //mpz_out_str(stdout,10,k);
 
   // declaration of variables outside a loop of testing witnesses for simple cleaning after processing
   mpz_t a; // randomly generated witness
@@ -133,14 +130,16 @@ bool miller_rabin_test(mpz_t n, int modulus_length)
 
   gmp_randstate_t state; // random state init for generating possible witnesses
   gmp_randinit_mt (state);
+
   // find possible witnesses
-  for (int i = 0; i < 5; i++)
+  for (int i = 0; i < 15; i++)
   {
+    mpz_sub(n1, n, one_value);
     gmp_randseed_ui(state, time(NULL));
-    mpz_urandomm(a,state,n);
-    cout << "Getting random number a" <<  endl;
+    mpz_urandomm(a,state,n1); // generate random number less or equal to n - 2
+    //cout << "Getting random number a" <<  endl;
     //mpz_set_str(a, "39", 10);
-    mpz_out_str(stdout,10,a);
+    //mpz_out_str(stdout,10,a);
 
     mpz_set(k_copy, k);
 
@@ -177,14 +176,12 @@ bool miller_rabin_test(mpz_t n, int modulus_length)
 
     mpz_mod(result, x, modular_exponentiation_modulo);
 
-    cout << "Result of modular exponentiation" <<  endl;
-    mpz_out_str(stdout,10,result);
+    //cout << "Result of modular exponentiation" <<  endl;
+    //mpz_out_str(stdout,10,result);
 
     // end of counting modular exponentiation
 
-    mpz_sub(n1, n, one_value);
-
-    // couning of (multiply_modulo_factor1 * multiply_modulo_factor2) % multiply_modulo_modulo
+    // counting of (multiply_modulo_factor1 * multiply_modulo_factor2) % multiply_modulo_modulo
     while (mpz_cmp(k_copy, n1) != 0 && mpz_cmp(result, one_value) != 0 && mpz_cmp(result, n1) != 0)
     {
       mpz_set(multiply_modulo_factor1, result);
@@ -216,8 +213,8 @@ bool miller_rabin_test(mpz_t n, int modulus_length)
 
     }
 
-    cout << "Result of multiply_modulo" <<  endl;
-    mpz_out_str(stdout,10,result);
+    //cout << "Result of multiply_modulo" <<  endl;
+    //mpz_out_str(stdout,10,result);
     //cout << "Res2" <<  endl;
 
     mpz_mod(k_copy_modulo, k_copy, two_value);
@@ -268,7 +265,11 @@ bool miller_rabin_test(mpz_t n, int modulus_length)
 
   }
 
-  cout << "Potential prime" << endl;
+  //cout << "Potential prime" << endl;
+
+  //cout << "Getting random number a" <<  endl;
+  //mpz_out_str(stdout,10,a);
+  //putchar('\n');
   // necessary cleaning to avoid memory leaks
   mpz_clear(two_value);
   mpz_clear(zero_value);
@@ -574,10 +575,10 @@ int main (int argc, char **argv) {
 
   mpz_set(random_number_value, random_number.get_mpz_t());
   size_t size = mpz_sizeinbase(random_number_value, 2);
-  cout << size << endl;
+  //cout << size << endl;
   mpz_init(msb_bit);
   mpz_set_ui(msb_bit, modulus_length - 1);
-  mpz_out_str(stdout,10,random_number_value);
+  //mpz_out_str(stdout,10,random_number_value);
   mpz_set_ui(modulus_length_value, modulus_length);
 
   mpz_t prime_value;
@@ -592,7 +593,6 @@ int main (int argc, char **argv) {
   mpz_init(zero_value);
   mpz_set_str(zero_value, "0", 10);
 
-  vector <unsigned long int> potential_primes;
   int generated_prime_count = 2;
 
   mpz_t p;
@@ -612,6 +612,7 @@ int main (int argc, char **argv) {
     //cout << mpz_get_ui(random_number_value) << " is potential prime" << endl;
     cout << "This number is potential prime:" << endl;
     mpz_out_str(stdout,10,random_number_value);
+    putchar('\n');
 
     if (generated_prime_count == 2)
     {
@@ -624,15 +625,11 @@ int main (int argc, char **argv) {
 
     generated_prime_count--;
     unsigned long int random_number_value_int = mpz_get_ui(random_number_value);
-    potential_primes.push_back(random_number_value_int);
 
   }
   mpz_add(random_number_value, random_number_value, one_value);
   }
 
-  cout << "Prime numms:" << endl;
-  cout << potential_primes.at(0) << endl;
-  cout << potential_primes.at(1) << endl;
 
   mpz_t n;
   mpz_init(n);
@@ -646,8 +643,6 @@ int main (int argc, char **argv) {
   mpz_sub(q1, q, one_value);
 
   mpz_mul(phi_n, p1, q1);
-
-  mpz_out_str(stdout,10,phi_n);
 
   // Zvol náhodně e mezi 1 a phi( n ) tak, že gcd(e, phi( n )) = 1
   mpz_t e;
@@ -668,20 +663,13 @@ int main (int argc, char **argv) {
   mpz_init(ten_value);
   mpz_set_str(ten_value, "144", 10);
 
-
-  //compute_gcd(four_value, ten_value);
-  cout << "Getting params " << endl;
-  mpz_out_str(stdout,10,e);
-  cout << "Getting params " << endl;
-  mpz_out_str(stdout,10,phi_n);
-
   mpz_t gcd_res;
   mpz_init(gcd_res);
   while (true)
   {
     compute_gcd(gcd_res, e, phi_n);
 
-    mpz_out_str(stdout,10,e);
+    //mpz_out_str(stdout,10,e);
     if (mpz_cmp(gcd_res, one_value) == 0)
     {
       break;
@@ -792,6 +780,34 @@ int main (int argc, char **argv) {
   compute_gcd(res, phi_n, e);
   cout << "Result of GCD" << endl;
   mpz_out_str(stdout,10,res);
+
+  // check of own miller rabin test generated prime correctness - DELETE !!!!!
+  putchar('\n');
+  if (mpz_probab_prime_p(p, 15) == 2)
+  {
+    cout << "P is definitely prime" << endl;
+  }
+  else if (mpz_probab_prime_p(p, 15) == 1)
+  {
+    cout << "P is probably prime" << endl;
+  }
+  else if (mpz_probab_prime_p(p, 15) == 0)
+  {
+    cout << "P is non-prime" << endl;
+  }
+
+  if (mpz_probab_prime_p(q, 15) == 2)
+  {
+    cout << "Q is definitely prime" << endl;
+  }
+  else if (mpz_probab_prime_p(q, 15) == 1)
+  {
+    cout << "Q is probably prime" << endl;
+  }
+  else if (mpz_probab_prime_p(q, 15) == 0)
+  {
+    cout << "Q is non-prime" << endl;
+  }
 
   // cleaning to avoid memory leaks
   mpz_clear(random_number_value);
