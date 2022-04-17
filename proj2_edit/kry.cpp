@@ -11,7 +11,7 @@
 
 using namespace std;
 
-
+// test for primality of potential prime candidate
 bool miller_rabin_test(mpz_t n, int modulus_length)
 {
   mpz_t two_value;
@@ -77,8 +77,6 @@ bool miller_rabin_test(mpz_t n, int modulus_length)
     }
 
   }
-  //cout << "Counted k" << endl;
-  //mpz_out_str(stdout,10,k);
 
   // declaration of variables outside a loop of testing witnesses for simple cleaning after processing
   mpz_t a; // randomly generated witness
@@ -137,20 +135,13 @@ bool miller_rabin_test(mpz_t n, int modulus_length)
     mpz_sub(n1, n, one_value);
     gmp_randseed_ui(state, time(NULL));
     mpz_urandomm(a,state,n1); // generate random number less or equal to n - 2
-    //cout << "Getting random number a" <<  endl;
-    //mpz_set_str(a, "39", 10);
-    //mpz_out_str(stdout,10,a);
 
     mpz_set(k_copy, k);
-
-    //mpz_out_str(stdout,10,k_copy);
 
     // counting modular exponentiation
     // (modular_exponentiation_base^modular_exponentiation_exponent) % modular_exponentiation_modulo
 
     mpz_set(modular_exponentiation_base, a);
-    //cout << "Getting modular_exponent_base" << endl;
-    //mpz_out_str(stdout,10,modular_exponentiation_base);
     mpz_set(modular_exponentiation_exponent, k_copy);
     mpz_set(modular_exponentiation_modulo, n);
 
@@ -163,22 +154,15 @@ bool miller_rabin_test(mpz_t n, int modulus_length)
         if (mpz_cmp(modulo_exponent, one_value) == 0)
         {
           mpz_mul(mul_operation, x, y);
-          //mpz_out_str(stdout,10,y);
-          //cout << "Update x" << endl;
           mpz_mod(x, mul_operation, modular_exponentiation_modulo);
         }
 
         mpz_mul(mul_operation, y, y);
         mpz_mod(y, mul_operation, modular_exponentiation_modulo);
         mpz_fdiv_q(modular_exponentiation_exponent, modular_exponentiation_exponent, two_value);
-        //mpz_out_str(stdout,10,exponent);
     }
 
     mpz_mod(result, x, modular_exponentiation_modulo);
-
-    //cout << "Result of modular exponentiation" <<  endl;
-    //mpz_out_str(stdout,10,result);
-
     // end of counting modular exponentiation
 
     // counting of (multiply_modulo_factor1 * multiply_modulo_factor2) % multiply_modulo_modulo
@@ -213,9 +197,6 @@ bool miller_rabin_test(mpz_t n, int modulus_length)
 
     }
 
-    //cout << "Result of multiply_modulo" <<  endl;
-    //mpz_out_str(stdout,10,result);
-    //cout << "Res2" <<  endl;
 
     mpz_mod(k_copy_modulo, k_copy, two_value);
     if (mpz_cmp(result, n1) != 0 && mpz_cmp(k_copy_modulo, zero_value) == 0)
@@ -265,11 +246,6 @@ bool miller_rabin_test(mpz_t n, int modulus_length)
 
   }
 
-  //cout << "Potential prime" << endl;
-
-  //cout << "Getting random number a" <<  endl;
-  //mpz_out_str(stdout,10,a);
-  //putchar('\n');
   // necessary cleaning to avoid memory leaks
   mpz_clear(two_value);
   mpz_clear(zero_value);
@@ -329,7 +305,6 @@ void compute_gcd(mpz_t out,mpz_t a, mpz_t b)
       mpz_set(out,b);
       mpz_clear(modulo_operation);
       mpz_clear(zero_value);
-      //mpz_out_str(stdout,10,out);
       return;
   }
 
@@ -354,7 +329,7 @@ void trivial_division(mpz_t out, mpz_t n)
 
   mpz_t divisor_end;
   mpz_init(divisor_end);
-  mpz_set_str(divisor_end, "1000001", 10);
+  mpz_set_str(divisor_end, "1000002", 10);
 
   mpz_t zero_value;
   mpz_init(zero_value);
@@ -406,8 +381,6 @@ void trivial_division(mpz_t out, mpz_t n)
         mpz_clear(modulo_result_iteration);
         return;
       }
-
-
     }
   }
 
@@ -454,8 +427,8 @@ void fermat_factorization(mpz_t out, mpz_t n)
   mpz_t b;
   mpz_init(b);
 
-  mpz_t b1;
-  mpz_init(b1);
+  mpz_t b2;
+  mpz_init(b2);
 
   mpz_t mul_operation_iteration_a;
   mpz_init(mul_operation_iteration_a);
@@ -465,11 +438,11 @@ void fermat_factorization(mpz_t out, mpz_t n)
   while (true)
   {
     mpz_mul(mul_operation_iteration_a, a, a);
-    mpz_sub(b1, mul_operation_iteration_a, n);
-    mpz_sqrt(b,b1);
+    mpz_sub(b2, mul_operation_iteration_a, n);
+    mpz_sqrt(b,b2);
 
     mpz_mul(mul_operation_iteration_b, b, b);
-    if (mpz_cmp(mul_operation_iteration_b, b1) == 0)
+    if (mpz_cmp(mul_operation_iteration_b, b2) == 0)
     {
       break;
     }
@@ -493,11 +466,13 @@ void fermat_factorization(mpz_t out, mpz_t n)
   mpz_set(out, p);
   mpz_mul(computed_n, p, q);
 
+  /*
   // check of correctness
   if (mpz_cmp(n, computed_n) == 0)
   {
     cout << "Fermat factorization was success" << endl;
   }
+  */
 
   mpz_clear(a);
   mpz_clear(n_sqrt);
@@ -505,7 +480,7 @@ void fermat_factorization(mpz_t out, mpz_t n)
   mpz_clear(mul_operation);
 
   mpz_clear(b);
-  mpz_clear(b1);
+  mpz_clear(b2);
   mpz_clear(mul_operation_iteration_a);
   mpz_clear(mul_operation_iteration_b);
 
@@ -515,7 +490,6 @@ void fermat_factorization(mpz_t out, mpz_t n)
   mpz_clear(computed_n);
 
   return;
-
 }
 
 
@@ -528,15 +502,12 @@ int main (int argc, char **argv) {
   bool b = false;
   int modulus_length;
 
-  unsigned long int seed_value;
-
   while ((opt = getopt (argc, argv, ":g:e:d:b:")) != -1)
   {
   switch (opt)
   {
     case 'g':
       modulus_length = atoi(optarg);
-      cout << modulus_length << endl;
       g = true;
     break;
 
@@ -574,16 +545,11 @@ int main (int argc, char **argv) {
   mpz_init(modulus_length_value);
 
   mpz_set(random_number_value, random_number.get_mpz_t());
-  size_t size = mpz_sizeinbase(random_number_value, 2);
-  //cout << size << endl;
-  mpz_init(msb_bit);
-  mpz_set_ui(msb_bit, modulus_length - 1);
-  //mpz_out_str(stdout,10,random_number_value);
-  mpz_set_ui(modulus_length_value, modulus_length);
 
-  mpz_t prime_value;
-  mpz_init(prime_value);
-  mpz_set_str(prime_value, "97", 10);
+  mpz_init(msb_bit);
+  // set msb bit to 1
+  mpz_set_ui(msb_bit, modulus_length - 1);
+  mpz_set_ui(modulus_length_value, modulus_length);
 
   mpz_t one_value;
   mpz_init(one_value);
@@ -605,15 +571,11 @@ int main (int argc, char **argv) {
   mpz_t q1;
   mpz_init(q1);
 
+  // generate 2 potential primes
   while (generated_prime_count > 0)
   {
   if (miller_rabin_test(random_number_value, modulus_length))
   {
-    //cout << mpz_get_ui(random_number_value) << " is potential prime" << endl;
-    cout << "This number is potential prime:" << endl;
-    mpz_out_str(stdout,10,random_number_value);
-    putchar('\n');
-
     if (generated_prime_count == 2)
     {
       mpz_set(p, random_number_value);
@@ -624,12 +586,10 @@ int main (int argc, char **argv) {
     }
 
     generated_prime_count--;
-    unsigned long int random_number_value_int = mpz_get_ui(random_number_value);
 
   }
   mpz_add(random_number_value, random_number_value, one_value);
   }
-
 
   mpz_t n;
   mpz_init(n);
@@ -652,16 +612,6 @@ int main (int argc, char **argv) {
   gmp_randinit_mt (state);
   gmp_randseed_ui(state, time(NULL));
   mpz_urandomm(e,state,phi_n);
-//  mpz_urandomb (e, state, 8);
-
-
-  mpz_t four_value;
-  mpz_init(four_value);
-  mpz_set_str(four_value, "12", 10);
-
-  mpz_t ten_value;
-  mpz_init(ten_value);
-  mpz_set_str(ten_value, "144", 10);
 
   mpz_t gcd_res;
   mpz_init(gcd_res);
@@ -669,14 +619,12 @@ int main (int argc, char **argv) {
   {
     compute_gcd(gcd_res, e, phi_n);
 
-    //mpz_out_str(stdout,10,e);
     if (mpz_cmp(gcd_res, one_value) == 0)
     {
       break;
     }
     mpz_add(e, e, one_value);
   }
-
 
   // compute of multiplicative inverse
   mpz_t a;
@@ -732,9 +680,6 @@ int main (int argc, char **argv) {
     mpz_add(x,x,m0);
   }
 
-  putchar('\n');
-  putchar('\n');
-  putchar('\n');
   cout << modulus_length << " ";
   cout << "0x";
   mpz_out_str(stdout,16,p);
@@ -752,9 +697,8 @@ int main (int argc, char **argv) {
   mpz_out_str(stdout,16,x);
 
   putchar('\n');
-  putchar('\n');
 
-
+  /*
   cout << "Modulus length: " << endl;
   cout << modulus_length;
   putchar('\n');
@@ -773,49 +717,12 @@ int main (int argc, char **argv) {
   cout << "X: " << endl;
   mpz_out_str(stdout,10,x);
   putchar('\n');
-
-
-  mpz_t res;
-  mpz_init(res);
-  compute_gcd(res, phi_n, e);
-  cout << "Result of GCD" << endl;
-  mpz_out_str(stdout,10,res);
-
-  // check of own miller rabin test generated prime correctness - DELETE !!!!!
-  putchar('\n');
-  if (mpz_probab_prime_p(p, 15) == 2)
-  {
-    cout << "P is definitely prime" << endl;
-  }
-  else if (mpz_probab_prime_p(p, 15) == 1)
-  {
-    cout << "P is probably prime" << endl;
-  }
-  else if (mpz_probab_prime_p(p, 15) == 0)
-  {
-    cout << "P is non-prime" << endl;
-  }
-
-  if (mpz_probab_prime_p(q, 15) == 2)
-  {
-    cout << "Q is definitely prime" << endl;
-  }
-  else if (mpz_probab_prime_p(q, 15) == 1)
-  {
-    cout << "Q is probably prime" << endl;
-  }
-  else if (mpz_probab_prime_p(q, 15) == 0)
-  {
-    cout << "Q is non-prime" << endl;
-  }
-
+  */
   // cleaning to avoid memory leaks
   mpz_clear(random_number_value);
   mpz_clear(modulus_length_value);
 
   mpz_clear(msb_bit);
-
-  mpz_clear(prime_value);
 
   mpz_clear(one_value);
   mpz_clear(zero_value);
@@ -830,9 +737,6 @@ int main (int argc, char **argv) {
   mpz_clear(phi_n);
   mpz_clear(e);
 
-  mpz_clear(four_value);
-  mpz_clear(ten_value);
-
   mpz_clear(gcd_res);
 
   mpz_clear(a);
@@ -844,7 +748,6 @@ int main (int argc, char **argv) {
   mpz_clear(t);
   mpz_clear(mul_operation);
 
-  mpz_clear(res);
   gmp_randclear(state);
 
 
@@ -872,7 +775,6 @@ if (e == true)
   mpz_t m;
   mpz_init(m);
 
-  // DONT FORGET INPUT ARE IN HEXA!!!!
   mpz_set_str(e, argv[2], 0);
   mpz_set_str(n, argv[3], 0);
   mpz_set_str(m, argv[4], 0);
@@ -890,8 +792,6 @@ if (e == true)
   mpz_clear(n);
   mpz_clear(m);
   mpz_clear(c);
-
-
 }
 
 if (d == true)
@@ -903,7 +803,6 @@ if (d == true)
   mpz_t c;
   mpz_init(c);
 
-  // DONT FORGET INPUT ARE IN HEXA!!!!
   mpz_set_str(d, argv[2], 0);
   mpz_set_str(n, argv[3], 0);
   mpz_set_str(c, argv[4], 0);
@@ -921,18 +820,12 @@ if (d == true)
   mpz_clear(n);
   mpz_clear(c);
   mpz_clear(m);
-
-
 }
 
 /*
 '''Prolomení RSA''' (2.6b)
 
 vstup: ./kry -b N
-
-'''Bezpečnost řešení''' (1b)
-Statická analýza - (0.3b)
-Sanitizéry - (0.7b)
 
 výstup: P
 */
@@ -945,14 +838,18 @@ if (b == true)
 
   mpz_t n;
   mpz_init(n);
-  mpz_set_str(n, argv[2], 10);
+  mpz_set_str(n, argv[2], 0);
 
   mpz_t trivial_division_res;
   mpz_init(trivial_division_res);
   trivial_division(trivial_division_res, n);
 
-  mpz_out_str(stdout,10,trivial_division_res);
-  putchar('\n');
+  if (mpz_cmp(trivial_division_res, one_value) != 0)
+  {
+    cout << "0x";
+    mpz_out_str(stdout,16,trivial_division_res);
+    putchar('\n');
+  }
 
   mpz_t fermat_factorization_res;
   mpz_init(fermat_factorization_res);
@@ -960,9 +857,10 @@ if (b == true)
   // trivial division unsucessful, need to call more effective fermat factorization
   if (mpz_cmp(trivial_division_res, one_value) == 0)
   {
-    cout << "Need to do fermat factorization" << endl;
+    //cout << "Need to do fermat factorization" << endl;
     fermat_factorization(fermat_factorization_res, n);
-    mpz_out_str(stdout,10,fermat_factorization_res);
+    cout << "0x";
+    mpz_out_str(stdout,16,fermat_factorization_res);
     putchar('\n');
   }
 
@@ -971,14 +869,7 @@ if (b == true)
   mpz_clear(trivial_division_res);
   mpz_clear(fermat_factorization_res);
 
-
-
-
-
-
 }
-
-
 
   return 0;
 }
