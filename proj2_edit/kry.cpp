@@ -1,3 +1,9 @@
+/*
+Author: Katerina Fortova (xforto00)
+Project: Implementation and factorization of RSA
+Academic Year: 2021/22
+*/
+
 #include <iostream>
 #include <cmath>
 #include <string>
@@ -504,35 +510,33 @@ int main (int argc, char **argv) {
 
   while ((opt = getopt (argc, argv, ":g:e:d:b:")) != -1)
   {
-  switch (opt)
-  {
-    case 'g':
+    if (opt == 'g')
+    {
       modulus_length = atoi(optarg);
       g = true;
-    break;
-
-    case 'e':
+    }
+    if (opt == 'e')
+    {
       e = true;
-    break;
-
-    case 'd':
+    }
+    if (opt == 'd')
+    {
       d = true;
-    break;
-
-    case 'b':
+    }
+    if (opt == 'b')
+    {
       b = true;
-    break;
-
-    default:
+    }
+    if (g == false && e == false && d == false && b == false)
+    {
       cerr << "Error - Bad parametres!\n";
       exit(EXIT_FAILURE);
-    break;
+    }
 
   }
-  }
 
 
-  if (g == true) {
+  if (g == true && e == false && d == false && b == false) {
   gmp_randclass r(gmp_randinit_default);
   r.seed(time(NULL));
   mpz_class random_number;
@@ -749,9 +753,6 @@ int main (int argc, char **argv) {
   mpz_clear(mul_operation);
 
   gmp_randclear(state);
-
-
-
 }
 
 /*
@@ -766,7 +767,7 @@ výstup: C
 vstup: ./kry -d D N C
 */
 
-if (e == true)
+else if (e == true && g == false && d == false && b == false)
 {
   mpz_t e;
   mpz_init(e);
@@ -794,7 +795,7 @@ if (e == true)
   mpz_clear(c);
 }
 
-if (d == true)
+else if (d == true && g == false && e == false && b == false)
 {
   mpz_t d;
   mpz_init(d);
@@ -829,8 +830,7 @@ vstup: ./kry -b N
 
 výstup: P
 */
-
-if (b == true)
+else if (b == true && g == false && e == false && d == false)
 {
   mpz_t one_value;
   mpz_init(one_value);
@@ -869,6 +869,11 @@ if (b == true)
   mpz_clear(trivial_division_res);
   mpz_clear(fermat_factorization_res);
 
+}
+else
+{
+  cerr << "Error - Specify only one mode -g, -e, -d or -b!\n";
+  exit(EXIT_FAILURE);
 }
 
   return 0;
