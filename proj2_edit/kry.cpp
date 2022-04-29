@@ -684,7 +684,6 @@ int main (int argc, char **argv) {
     mpz_add(x,x,m0);
   }
 
-  cout << modulus_length << " ";
   cout << "0x";
   mpz_out_str(stdout,16,p);
   cout << " ";
